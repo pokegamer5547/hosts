@@ -53,7 +53,7 @@ jobs:
       - name: Commit changes
         run: |
           git add .
-          git commit -m "Update hosts file" || echo "No changes to commit"
+          git commit -m "Update hosts file" --author="GitHub Actions <actions@github.com>" || echo "No changes to commit"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
