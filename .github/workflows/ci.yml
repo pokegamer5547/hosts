@@ -1,13 +1,28 @@
 name: CI
 
-            python: '3.8'
-          - os: macos-latest
-            python: '3.12'
-          - os: windows-latest
-            python: '3.8'
-          - os: windows-latest
-            python: '3.12'
+on:
+  push:
+    branches:
+      - master
+      - "!dependabot/**"
+  pull_request:
+  workflow_dispatch:
 
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          - '3.12'
+        os:
+          - ubuntu-latest
 
     steps:
       - name: Clone repository
@@ -15,32 +30,27 @@ name: CI
         with:
           persist-credentials: false
 
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
           cache: pip
 
-
       - name: Print versions
         run: |
           python --version
           pip --version
 
-
       - name: Install Python dependencies
         run: pip install -r requirements.txt
-
 
       - name: Run lint
         run: flake8
 
-
       - name: Run tests
         run: python updateHostsFile.py --auto
 
-      - name: Commit changes
+              - name: Commit changes
         run: |
           git add .
           git commit -m "Update hosts file" || echo "No changes to commit"
