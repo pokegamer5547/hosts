@@ -1,17 +1,13 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - main
+            python: '3.8'
+          - os: macos-latest
+            python: '3.12'
+          - os: windows-latest
+            python: '3.8'
+          - os: windows-latest
+            python: '3.12'
 
-jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
-        python: ['3.8', '3.12']
 
     steps:
       - name: Clone repository
@@ -19,22 +15,27 @@ jobs:
         with:
           persist-credentials: false
 
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
           cache: pip
 
+
       - name: Print versions
         run: |
           python --version
           pip --version
 
+
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+
       - name: Run lint
         run: flake8
+
 
       - name: Run tests
         run: python updateHostsFile.py --auto
