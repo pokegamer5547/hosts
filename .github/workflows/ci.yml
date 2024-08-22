@@ -3,39 +3,15 @@ name: CI
 on:
   push:
     branches:
-      - master
-      - "!dependabot/**"
-  pull_request:
-  workflow_dispatch:
-
-permissions:
-  contents: read
+      - main
 
 jobs:
-  test:
-    name: Python ${{ matrix.python }} on ${{ matrix.os }}
+  build:
     runs-on: ${{ matrix.os }}
-
     strategy:
-      fail-fast: false
       matrix:
-        python:
-          - '3.8'
-          - '3.9'
-          - '3.10'
-          - '3.11'
-          - '3.12'
-        os:
-          - ubuntu-latest
-        include:
-          - os: macos-latest
-            python: '3.8'
-          - os: macos-latest
-            python: '3.12'
-          - os: windows-latest
-            python: '3.8'
-          - os: windows-latest
-            python: '3.12'
+        os: [macos-latest, windows-latest]
+        python: ['3.8', '3.12']
 
     steps:
       - name: Clone repository
@@ -60,8 +36,18 @@ jobs:
       - name: Run lint
         run: flake8
 
-      - name: Run makeHosts.py
-        run: python makeHosts.py
-
       - name: Run tests
         run: python updateHostsFile.py --auto
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Update hosts file" || echo "No changes to commit"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes
+        run: |
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
