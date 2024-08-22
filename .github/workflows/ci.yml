@@ -1,5 +1,6 @@
 name: CI
 
+
 on:
   push:
     branches:
@@ -8,13 +9,16 @@ on:
   pull_request:
   workflow_dispatch:
 
+
 permissions:
   contents: read
+
 
 jobs:
   test:
     name: Python ${{ matrix.python }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
 
     strategy:
       fail-fast: false
@@ -24,11 +28,13 @@ jobs:
         os:
           - ubuntu-latest
 
+
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,29 +42,37 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
 
+
       - name: Print versions
         run: |
           python --version
           pip --version
 
+
       - name: Install Python dependencies
         run: pip install -r requirements.txt
+
 
       - name: Run lint
         run: flake8
 
+
       - name: Run tests
         run: python updateHostsFile.py --auto
 
-              - name: Commit changes
+
+- name: Commit changes
         run: |
           git add .
           git commit -m "Update hosts file" || echo "No changes to commit"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
       - name: Push changes
         run: |
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git add .
+          git commit -m "Update hosts
